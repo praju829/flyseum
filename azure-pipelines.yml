@@ -68,6 +68,12 @@ steps:
     effectivePomSkip: false
     sonarQubeRunAnalysis: false 
 
-
+- task: CopyFilesOverSSH@0
+  inputs:
+    sshEndpoint: 'tomcat-azuredevops-conn'
+    sourceFolder: '/home/vsts/work/1/s/target'
+    contents: '**/*.war'
+    targetFolder: '/var/lib/tomcat9/webapps'
+    readyTimeout: '20000'
 
 
