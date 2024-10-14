@@ -14,6 +14,7 @@ steps:
   displayName: 'Run a one-line script'
 - task: Maven@4
   inputs:
+    azureSubscription: 'Free Trial(fb962878-3638-424f-828d-9981df032f64)'
     mavenPomFile: 'pom.xml'
     goals: 'compile'
     publishJUnitResults: true
@@ -22,58 +23,42 @@ steps:
     mavenVersionOption: 'Default'
     mavenAuthenticateFeed: false
     effectivePomSkip: false
-    sonarQubeRunAnalysis: false 
+    sonarQubeRunAnalysis: true
+    sqMavenPluginVersionChoice: 'latest'
 
 - task: dependency-check-build-task@6
   inputs:
     projectName: 'flyseum'
-    scanPath: '/home/vsts/work/1/s/target'
+    scanPath: '/home/vsts/work/1/s/target'''
     format: 'HTML'
+    uploadReports: true
 
 - task: SnykSecurityScan@1
   inputs:
-    serviceConnectionEndpoint: 'snyk'
+    serviceConnectionEndpoint: 'snyk connection'
     testType: 'app'
     monitorWhen: 'always'
-    failOnIssues: false 
+    failOnIssues: true
 
-- task: SonarCloudPrepare@1
+- task: SonarCloudPrepare@2
   inputs:
-    SonarCloud: 'azuredevops-sonarcloud-conn'
-    organization: 'prajktamhapsekar829'
+    SonarCloud: 'sonarcloud connection'
+    organization: 'my-devops-decoding'
     scannerMode: 'CLI'
     configMode: 'manual'
-    cliProjectKey: 'prajktamhapsekar829'
+    cliProjectKey: 'my-devops-decoding'
     cliProjectName: 'flyseum'
     cliSources: '.'
     extraProperties: |
       # Additional properties that will be passed to the scanner, 
       # Put one key=value per line, example:
       # sonar.exclusions=**/*.bin
-      sonar.java.binaries=.
-- task: SonarCloudAnalyze@1
-- task: SonarCloudPublish@1
+      sonar.java.binaries=. 
+
+- task: SonarCloudAnalyze@2
+  inputs:
+    jdkversion: 'JAVA_HOME_17_X64'
+
+- task: SonarCloudPublish@2
   inputs:
     pollingTimeoutSec: '300'
-
-- task: Maven@4
-  inputs:
-    mavenPomFile: 'pom.xml'
-    goals: 'clean install'
-    publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    javaHomeOption: 'JDKVersion'
-    mavenVersionOption: 'Default'
-    mavenAuthenticateFeed: false
-    effectivePomSkip: false
-    sonarQubeRunAnalysis: false 
-
-- task: CopyFilesOverSSH@0
-  inputs:
-    sshEndpoint: 'tomcat-azuredevops-conn'
-    sourceFolder: '/home/vsts/work/1/s/target'
-    contents: '**/*.war'
-    targetFolder: '/var/lib/tomcat9/webapps'
-    readyTimeout: '20000'
-
-
